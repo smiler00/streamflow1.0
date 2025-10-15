@@ -1,0 +1,299 @@
+# StreamFlow Publishing Workflow
+# ===============================
+# This workflow builds, tests, and publishes the StreamFlow package
+# to PyPI and creates GitHub releases when tags are pushed.
+
+name: 🚀 Publish & Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags (e.g., v1.0.0)
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  # Quality checks before publishing
+  quality-checks:
+    name: 🔍 Quality Checks
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, '3.10', '3.11']
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🐍 Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt -r requirements-dev.txt
+
+    - name: 🧪 Run tests with coverage
+      run: |
+        python run_tests.py
+
+    - name: 📊 Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+
+    - name: 🔍 Lint code
+      run: |
+        black --check streamflow/ tests/
+        flake8 streamflow/ tests/
+        mypy streamflow/
+
+    - name: 🔒 Security scan
+      uses: securecodewarrior/github-action-gosec@master
+      with:
+        args: './...'
+
+  # Build and test package
+  build-test:
+    name: 🔨 Build & Test Package
+    runs-on: ubuntu-latest
+    needs: quality-checks
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 📦 Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+
+    - name: 🔨 Build package
+      run: python -m build
+
+    - name: 📋 Check package contents
+      run: |
+        python -m twine check dist/*
+
+    - name: 🧪 Install and test package
+      run: |
+        pip install dist/*.whl
+        python -c "import streamflow; print('✅ Package import successful')"
+
+  # Publish to PyPI (only on tags)
+  publish-pypi:
+    name: 📦 Publish to PyPI
+    runs-on: ubuntu-latest
+    needs: build-test
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 📦 Install publishing tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+
+    - name: 🔨 Build package
+      run: python -m build
+
+    - name: 🚀 Publish to PyPI
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      run: |
+        python -m twine upload dist/*
+
+  # Create GitHub release
+  create-release:
+    name: 📦 Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [quality-checks, build-test]
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 📝 Generate changelog
+      id: changelog
+      run: |
+        # Get the latest tag and generate changelog
+        git fetch --tags
+        LATEST_TAG=$(git describe --tags --abbrev=0 HEAD^)
+        CHANGES=$(git log --oneline ${LATEST_TAG}..HEAD | head -20)
+
+        echo "changelog<<EOF" >> $GITHUB_OUTPUT
+        echo "## 🚀 Release Notes" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "### ✨ What's New" >> $GITHUB_OUTPUT
+        echo "${CHANGES}" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "### 📦 Installation" >> $GITHUB_OUTPUT
+        echo "\`\`\`bash" >> $GITHUB_OUTPUT
+        echo "pip install streamflow==${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        echo "\`\`\`" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: 📦 Create release
+      uses: softprops/action-gh-release@v1
+      with:
+        body: ${{ steps.changelog.outputs.changelog }}
+        files: |
+          dist/*.whl
+          dist/*.tar.gz
+        draft: false
+        prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Deploy documentation
+  deploy-docs:
+    name: 📚 Deploy Documentation
+    runs-on: ubuntu-latest
+    needs: [quality-checks, build-test]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install mkdocs mkdocs-material
+
+    - name: 🔨 Build documentation
+      run: |
+        cd docs/
+        mkdocs build
+
+    - name: 🚀 Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs/site
+
+  # Docker build and push
+  docker-build:
+    name: 🐳 Build Docker Image
+    runs-on: ubuntu-latest
+    needs: build-test
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🔐 Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: 🔑 Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: 🏗️ Build and push Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: |
+          streamflow/streamflow:latest
+          streamflow/streamflow:${{ github.ref_name }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  # Notify on completion
+  notify:
+    name: 📢 Send Notifications
+    runs-on: ubuntu-latest
+    needs: [publish-pypi, create-release, deploy-docs, docker-build]
+    if: always()
+
+    steps:
+    - name: 📧 Send email notification
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.SMTP_USERNAME }}
+        password: ${{ secrets.SMTP_PASSWORD }}
+        subject: "🚀 StreamFlow ${{ github.ref_name }} Published!"
+        body: |
+          🎉 StreamFlow ${{ github.ref_name }} has been successfully published!
+
+          📦 PyPI: https://pypi.org/project/streamflow/${{ github.ref_name }}/
+          🐳 Docker: https://hub.docker.com/r/streamflow/streamflow/tags
+          📚 Docs: https://streamflow.readthedocs.io
+          🔗 Release: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}
+
+          Thanks for your contribution! 🚀
+        to: ${{ secrets.NOTIFICATION_EMAIL }}
+        from: StreamFlow Bot <noreply@streamflow.io>
+
+    - name: 💬 Post to Slack
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: 8398a7/action-slack@v3
+      with:
+        status: success
+        text: "🎉 StreamFlow ${{ github.ref_name }} published successfully!"
+        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # Performance benchmarks
+  benchmark:
+    name: 📊 Performance Benchmarks
+    runs-on: ubuntu-latest
+    needs: quality-checks
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt -r requirements-dev.txt
+
+    - name: 🚀 Run performance tests
+      run: |
+        python -m pytest tests/performance/ -v --tb=short
+
+    - name: 📈 Store benchmark results
+      uses: benchmark-action/github-action-benchmark@v1
+      if: github.event_name != 'pull_request'
+      with:
+        name: StreamFlow Performance Benchmarks
+        tool: 'pytest'
+        output-file-path: benchmark.json
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        auto-push: true
