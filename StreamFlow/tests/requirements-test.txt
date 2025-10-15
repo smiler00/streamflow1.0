@@ -1,0 +1,5 @@
+# Test dependencies for StreamFlow
+
+pytest
+# Performance testing
+psutil

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamFlow - Real-time Data Processing Framework</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Custom CSS -->
+    <style>
+        .markdown-content {
+            line-height: 1.7;
+        }
+
+        .markdown-content h1,
+        .markdown-content h2,
+        .markdown-content h3,
+        .markdown-content h4,
+        .markdown-content h5,
+        .markdown-content h6 {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .markdown-content h1 {
+            font-size: 2.25rem;
+        }
+
+        .markdown-content h2 {
+            font-size: 1.875rem;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.5rem;
+        }
+
+        .markdown-content h3 {
+            font-size: 1.5rem;
+        }
+
+        .markdown-content h4 {
+            font-size: 1.25rem;
+        }
+
+        .markdown-content h5 {
+            font-size: 1.125rem;
+        }
+
+        .markdown-content h6 {
+            font-size: 1rem;
+        }
+
+        .markdown-content p {
+            margin-bottom: 1rem;
+        }
+
+        .markdown-content code {
+            background-color: #f3f4f6;
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875em;
+        }
+
+        .markdown-content pre {
+            background-color: #1f2937;
+            color: #f9fafb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+
+        .markdown-content pre code {
+            background-color: transparent;
+            padding: 0;
+            color: inherit;
+        }
+
+        .markdown-content blockquote {
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+            margin-left: 0;
+            font-style: italic;
+            color: #6b7280;
+        }
+
+        .markdown-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+
+        .markdown-content th,
+        .markdown-content td {
+            border: 1px solid #d1d5db;
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .markdown-content th {
+            background-color: #f9fafb;
+            font-weight: 600;
+        }
+
+        .markdown-content ul,
+        .markdown-content ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .markdown-content li {
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-link {
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-link:hover {
+            background-color: #f3f4f6;
+            transform: translateX(4px);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans">
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-stream text-2xl"></i>
+                    <h1 class="text-2xl font-bold">StreamFlow</h1>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#overview" class="hover:text-blue-200 transition-colors">
+                        <i class="fas fa-eye mr-1"></i> Overview
+                    </a>
+                    <a href="#installation" class="hover:text-blue-200 transition-colors">
+                        <i class="fas fa-download mr-1"></i> Installation
+                    </a>
+                    <a href="#examples" class="hover:text-blue-200 transition-colors">
+                        <i class="fas fa-code mr-1"></i> Examples
+                    </a>
+                    <a href="#api" class="hover:text-blue-200 transition-colors">
+                        <i class="fas fa-book mr-1"></i> API
+                    </a>
+                </div>
+                <button class="md:hidden">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-5xl font-bold mb-6">
+                <i class="fas fa-stream mr-3"></i>
+                StreamFlow
+            </h1>
+            <p class="text-xl mb-8 max-w-3xl mx-auto">
+                🚀 A powerful, production-ready framework for real-time data stream processing,
+                featuring AI integration, visualization, and plugin extensibility.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                    <i class="fas fa-chart-line mr-2"></i>Real-time Processing
+                </span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                    <i class="fas fa-robot mr-2"></i>AI Integration
+                </span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                    <i class="fas fa-chart-bar mr-2"></i>Visualization
+                </span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                    <i class="fas fa-plug mr-2"></i>Extensible
+                </span>
+            </div>
+            <div class="flex justify-center space-x-4">
+                <a href="#installation"
+                    class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-rocket mr-2"></i>Get Started
+                </a>
+                <a href="https://github.com/smiler00/streamflow1.0"
+                    class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
+                    <i class="fab fa-github mr-2"></i>View on GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="lg:flex">
+            <!-- Sidebar for Table of Contents -->
+            <aside class="lg:w-1/4 pr-8 mb-8 lg:mb-0 sidebar">
+                <div class="sticky top-8">
+                    <h3 class="text-lg font-semibold mb-4 text-gray-800">
+                        <i class="fas fa-list mr-2"></i>Table of Contents
+                    </h3>
+                    <nav class="space-y-2">
+                        <a href="#overview" class="block sidebar-link p-3 rounded-lg text-gray-600 hover:text-blue-600">
+                            <i class="fas fa-eye mr-2"></i> Overview
+                        </a>
+                        <a href="#installation"
+                            class="block sidebar-link p-3 rounded-lg text-gray-600 hover:text-blue-600">
+                            <i class="fas fa-download mr-2"></i> Installation
+                        </a>
+                        <a href="#quick-start"
+                            class="block sidebar-link p-3 rounded-lg text-gray-600 hover:text-blue-600">
+                            <i class="fas fa-rocket mr-2"></i> Quick Start
+                        </a>
+                        <a href="#core-concepts"
+                            class="block sidebar-link p-3 rounded-lg text-gray-600 hover:text-blue-600">
+                            <i class="fas fa-cogs mr-2"></i> Core Concepts
+                        </a>
+                        <a href="#api-reference"
+                            class="block sidebar-link p-3 rounded-lg text-gray-600 hover:text-blue-600">
+                            <i class="fas fa-book mr-2"></i> API Reference
+                        </a>
+                        <a href="#examples" class="block sidebar-link p-3 rounded-lg text-gray-600 hover:text-blue-600">
+                            <i class="fas fa-code mr-2"></i> Examples
+                        </a>
+                        <a href="#configuration"
+                            class="block sidebar-link p-3 rounded-lg text-gray-600 hover:text-blue-600">
+                            <i class="fas fa-wrench mr-2"></i> Configuration
+                        </a>
+                        <a href="#performance"
+                            class="block sidebar-link p-3 rounded-lg text-gray-600 hover:text-blue-600">
+                            <i class="fas fa-tachometer-alt mr-2"></i> Performance
+                        </a>
+                        <a href="#testing" class="block sidebar-link p-3 rounded-lg text-gray-600 hover:text-blue-600">
+                            <i class="fas fa-vial mr-2"></i> Testing
+                        </a>
+                        <a href="#contributing"
+                            class="block sidebar-link p-3 rounded-lg text-gray-600 hover:text-blue-600">
+                            <i class="fas fa-hands-helping mr-2"></i> Contributing
+                        </a>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="lg:w-3/4">
+                <div id="content" class="prose prose-lg max-w-none">
+                    <!-- Content will be loaded here -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="gradient-bg text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fas fa-stream text-2xl"></i>
+                        <h3 class="text-xl font-bold">StreamFlow</h3>
+                    </div>
+                    <p class="text-blue-100">
+                        Real-time data processing framework with AI integration and visualization capabilities.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#installation" class="text-blue-100 hover:text-white">Installation</a></li>
+                        <li><a href="#examples" class="text-blue-100 hover:text-white">Examples</a></li>
+                        <li><a href="#api" class="text-blue-100 hover:text-white">API Reference</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="https://streamflow.readthedocs.io"
+                                class="text-blue-100 hover:text-white">Documentation</a></li>
+                        <li><a href="https://github.com/smiler00/streamflow"
+                                class="text-blue-100 hover:text-white">GitHub</a></li>
+                        <li><a href="https://github.com/smiler00/streamflow/issues"
+                                class="text-blue-100 hover:text-white">Issues</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Contact</h4>
+                    <ul class="space-y-2">
+                        <li class="text-blue-100 hover:text-white">
+                            <i class="fas fa-envelope mr-2"></i>
+                            <a href="mailto:smilerambro@gmail.com" target="_blank">smilerambro@gmail.com</a>
+                        </li>
+                        <li class="text-blue-100 hover:text-white">
+                            <i class="fab fa-github mr-2"></i>
+                            <a href="https://github.com/smiler00" target="_blank">github.com/smiler00</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-blue-400 mt-8 pt-8 text-center text-blue-100">
+                <p>&copy; 2025 StreamFlow. Built with ❤️ for real-time data processing.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Load README content and render as markdown
+        async function loadContent() {
+            try {
+                // Fetch the README.md file from the server
+                const response = await fetch('/README.md');
+
+                if (!response.ok) {
+                    throw new Error(`Echec de la récupération de README.md: ${response.status}`);
+                }
+
+                const readmeContent = await response.text();
+
+                // Render markdown
+                const htmlContent = marked.parse(readmeContent);
+                document.getElementById('content').innerHTML = htmlContent;
+
+                // Add smooth scrolling for anchor links
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const target = document.querySelector(this.getAttribute('href'));
+                        if (target) {
+                            target.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error('Error loading README content:', error);
+                document.getElementById('content').innerHTML =
+                    '<div class="text-red-600 text-center py-8"><i class="fas fa-exclamation-triangle mr-2"></i>Erreur de chargement du contenu de la documentation. Assurez-vous que README.md existe dans le répertoire parent.</div>';
+            }
+        }
+
+        // Load content when page loads
+        document.addEventListener('DOMContentLoaded', loadContent);
+    </script>
+</body>
+
+</html>
